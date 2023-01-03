@@ -1,4 +1,3 @@
-//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
 #include <iostream>
 #include <vector>
 
