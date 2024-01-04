@@ -6,6 +6,3 @@ ALGORITHM
 
 ## 백준 푼 문제수/티어
 [![Solved.ac Profile](http://mazassumnida.wtf/api/v2/generate_badge?boj=jaehoon0429)](https://solved.ac/jaehoon0429/)
-
-## 알고리즘 블로그
-[개인 블로그 포스팅 바로가기](https://racchoon.github.io/category/#algorithm)
