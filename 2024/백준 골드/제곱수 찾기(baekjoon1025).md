@@ -1,4 +1,4 @@
-계란으로 계란치기
+제곱수 찾기
 ====
 <br/>
 
@@ -7,7 +7,7 @@
 <br/>
 
 >### 문제
-> <a href="https://www.acmicpc.net/problem/16987">문제 바로 가기(baekjoon 16987)</a>
+> <a href="https://www.acmicpc.net/problem/1025">문제 바로 가기(baekjoon 1025)</a>
 
 <br/>
 
@@ -15,68 +15,92 @@
 ```C++
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <cmath>
 
 using namespace std;
 
-int eggNum;
+int n, m;
 
-int getBreakEggs(vector<pair<int, int>>& eggInfos) {
-    int cnt=0;
-    vector<pair<int, int>>::iterator iter=eggInfos.begin();
+vector<int> allNums;
 
-    while(iter!=eggInfos.end()) {
-        if((*iter).first<=0) cnt++;
-        iter++;
-    }
+vector<int> dxs;
+vector<int> dys;
 
-    return cnt;
+void startThisPlace(int currX, int currY, int dx, int dy, int bef, vector<string>& map) {
+    int nextX=currX+dx;
+    int nextY=currY+dy;
+
+    if(nextX<0 || nextX>m-1 || nextY<0 || nextY>n-1) return;
+
+    int curr=10*bef+(map[nextY][nextX]-'0');
+    allNums.push_back(curr);
+    startThisPlace(currX+dx, currY+dy, dx, dy, curr, map);
 }
 
-int getMaxBreak(vector<pair<int, int>>& eggInfos, int currEgg) {
-    if(currEgg==eggNum) {
-        return getBreakEggs(eggInfos);
+void makeCases(vector<string>& map) {
+    for(int i=0; i<n; i++) {
+        for(int j=0; j<m; j++) {
+            allNums.push_back(map[i][j]-'0');
+            if(map[i][j]=='0') continue;
+
+            for(int k=0; k<dxs.size(); k++) {
+                startThisPlace(j, i, dxs[k], dys[k], map[i][j]-'0', map);
+            }
+        }
     }
-    if(eggInfos[currEgg].first<=0) return getMaxBreak(eggInfos, currEgg+1);
-
-    bool hit=false;
-    int ret=0;
-    for(int i=0; i<eggNum; i++) {
-        if(i==currEgg) continue;
-        if(eggInfos[i].first<=0) continue;
-
-        hit=true;
-
-        eggInfos[i].first-=eggInfos[currEgg].second;
-        eggInfos[currEgg].first-=eggInfos[i].second;
-
-        ret=max(ret, getMaxBreak(eggInfos, currEgg+1));
-
-        eggInfos[i].first+=eggInfos[currEgg].second;
-        eggInfos[currEgg].first+=eggInfos[i].second;
-    }
-
-    if(!hit) ret=getMaxBreak(eggInfos, currEgg+1);
-
-    return ret;
 }
 
 int main() {
-    cin>>eggNum;
-    vector<pair<int, int>> eggInfos(eggNum);
+    cin>>n>>m;
+    vector<string> map(n);
 
-    for(int i=0; i<eggNum; i++) {
-        cin>>eggInfos[i].first>>eggInfos[i].second;
+    for(int i=0; i<n; i++) cin>>map[i];
+
+    for(int i=-n; i<=n; i++) {
+        for(int j=-m; j<=m; j++) {
+            if(i==0 && j==0) continue;
+
+            dxs.push_back(j);
+            dys.push_back(i);
+        }
     }
 
-    cout<<getMaxBreak(eggInfos, 0);
+    makeCases(map);
+
+    sort(allNums.begin(), allNums.end());
+    
+    int allNumPointer=0;
+    int ret=-1;
+    int i=0;
+
+    while(allNumPointer<allNums.size()) {
+        int currPow=pow(i, 2);
+
+        if(currPow==allNums[allNumPointer]) {
+            ret=currPow;
+            allNumPointer++;
+            i++;
+        }             
+        else if(currPow<allNums[allNumPointer]) {
+            i++;
+        }
+        else {
+            allNumPointer++;
+        }
+    }
+
+    cout<<ret;
 }
 ```
 <br/>
 
 >### 회고
->원래 풀려고 했던 문제는 다른 문제였는데 도저히 왜 틀리는지 모르겠어서 한참 고민하다 일일 스트릭 깨지기 싫어서 이거라도 풀게 되었다.  
->문제가 엄청 길었는데 나름 스토리는 재밌었던거 같다.  
->이터레이터 쓸 때마다 놓치는 부분이 ++을 안해줘서 무한 반복에 빠지는 것이다. 뭔가 만성적으로 매일 빼먹는 느낌이었는데 요즘엔 그래도 하도 빼먹다 보니 반사적으로 ++가 생각나는 것 같다.  
->문제는 크게 특별한 부분은 없었지만 굳이 회고해 보자면 달걀을 한번 쳐서 내구도가 닳은 상태에서 백트래킹 하기 위해서 원상복구를 해야 했는데, 내구도가 다 닳은 달걀의 내구도를 0으로 표기하면 원상복구가 힘들어서 내구도가 음수도 가능하게 했다. 그리고 달걀이 하나만 남았는데 인덱스 상으로 가장 오른쪽에 있는 달걀이 아닐 경우 재귀함수를 끝내야 하는 상황인데 기저사례에 걸리지 않아서 `hit`이라는 플래그를 사용했다. 더 좋은 방법이 있을 거 같긴 했지만 당장 생각나는 충분히 쉬운 방법을 두고 더 멋진 방법을 찾을 필요는 없을 거 같아서 사용했다.  
->회고하다 알게 됐는데 `getBreakEggs`함수가 O(n)의 시간 복잡도를 가지기 때문에 조금 빡빡하게 시간 초과를 면한 것 같다. n이 최대 8밖에 안돼서 이렇게 풀어도 무리 없을거라 생각했는데 조금 위험했을지도.  
->달걀 개수가 1개만 더 많았어도 브루트포스 말고 다른 방법을 생각해야 했을 것이다. 지금 알고리즘은 O(n^n)의 시간 복잡도를 가져 달걀 개수가 1개 추가될 때마다 시간이 기하급수적으로 증가한다.  
+>오늘도 역시 코드가 별로 맘에 들지는 않는다.  
+>그래도 이번 코드는 짧은 시간 안에 빠르게 짜야 했던 상황이라 어쩔 수 없었다고 생각한다.  
+>처음에 시간 초과가 나서 쓸데 없이 중복되는 부분을 리펙토링 해보긴 했는데 유의미한 결과가 나오진 않았다.  
+>별로 시간이 줄어들지 않은 거 같은데 시간 안에 통과했다.  
+>처음 코드도 계산해 봤을때 시간 초과가 날만한 코드가 아니었는데 사실 `dxs`와 `dys`에 각각 j와 i를 푸쉬했어야 했는데 반대로 i와 j를 푸쉬하는 실수가 있었다.  
+>그런데 왜 틀렸습니다가 아니라 시간 초과가 났는지 모르겠군...재귀 함수의 기저사례에 걸리지 않아 재귀함수가 무한 반복 했거나 내 계산보다 훨씬 많이 실행된 것이 아닐까 의심중인데 잘 모르겠다.  
+>결과적으로 굳이 코드를 리펙토링 할 필요는 없었고 그냥 버그만 잡았으면 됐을 거 같다.  
+>마지막에 제곱수인지 검사하는 부분에서 쉽게 생각할 수 있는 i를 증가하면서 제곱해 비교해 보는 방식으로 코드를 짜면 시간초과가 날 것 같아서 투포인터를 응용한 방식으로 시간을 줄였다.  
