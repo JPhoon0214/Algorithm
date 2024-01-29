@@ -7,40 +7,70 @@
 <br/>
 
 >### 문제
-> <a href="https://www.acmicpc.net/problem/4375">문제 바로 가기(baekjoon 4375)</a>
+> <a href="https://www.acmicpc.net/problem/24725">문제 바로 가기(baekjoon 24725)</a>
 
 <br/>
 
 >### 코드
 ```C++
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
-int main() {
-    while(true) {
-        int input;
-        cin>>input;
+const int dxs[8]={0, 1, 1, 1, 0, -1, -1, -1};
+const int dys[8]={1, 1, 0, -1, -1, -1, 0, 1};
 
-        if(cin.eof()) break;
+const string mbti[16]={
+    "INFP", "INFJ", "INTP", "INTJ", "ISFP", "ISFJ", "ISTP", "ISTJ", 
+    "ENFP", "ENFJ", "ENTP", "ENTJ", "ESFP", "ESFJ", "ESTP", "ESTJ"
+};
 
-        int cnt=0;
-        int currRemain=0;
-        while(true) {
-            cnt++;
-            currRemain*=10;
-            currRemain+=1;
-            currRemain%=input;
-            if(currRemain==0) break;
-        }
-        cout<<cnt<<"\n";
+int height, width;
+
+bool isMBTI(string& curr) {
+    for(int i=0; i<16; i++) {
+        if(mbti[i]==curr) return true;
     }
+    return false;
+}
+
+bool check(int x, int y, int dx, int dy, string& curr, vector<string>& map) {
+    if(curr.size()==4) return isMBTI(curr);
+    if(x<0 || x>width-1 || y<0 || y>height-1) return false;
+
+    curr.push_back(map[y][x]);
+    return check(x+dx, y+dy, dx, dy, curr, map);
+}
+
+int getCnt(vector<string>& map) {
+    int cnt=0;
+
+    for(int i=0; i<height; i++) {
+        for(int j=0; j<width; j++) {
+            for(int k=0; k<8; k++) {
+                string mbtiStr="";
+                if(check(j, i, dxs[k], dys[k], mbtiStr, map)) cnt++;
+            }
+        }
+    }
+    return cnt;
+}
+
+int main() {
+    cin>>height>>width;
+
+    vector<string> map(height);
+    for(int i=0; i<height; i++) cin>>map[i];
+
+    cout<<getCnt(map);
 }
 ```
 <br/>
 
 >### 회고
->실전에서 이 문제를 브루트포스로 풀 엄두를 낼 수 있었을까?? 확신은 안 섰을 것 같다.  
->그래도 여러 정황상 결국 브루트포스로 풀지 않았을까  
->그냥 숫자를 만들어서 나머지를 구하면 오버플로가 날 수도 있다 생가해서 이전 자리수의 나머지를 구한 후 10을 곱해 다시 나머지를 구하는 방식으로 진행했다.  
->long long을 이용해도 잘해야 19자리 정도밖에 계산 못하지만, 위와 같이 하면 1억 자리도 계산할 수 있다.  
+>코드는 깔끔한 것 같다. 그런데 뭔가 3중 for문이 거슬리는...하하  
+>dxs[], dys[]를 순회하는 반복문에서 범위를 8이 아니라 16으로 돌려서 두번 틀렸다. 요즘 이런 저런 실수로 한번에 잘 못맞추는데 감이 떨어진건가 싶다.  
+>아니면 너무 새벽에 풀어서 제정신이 아닌 걸지도.  
+>근데 다시 생각해보니 상수로 범위를 정한게 애초에 위험했던 것 같다. 향상된 for문이 아니면 size() 메서드를 다음부터 이용하자.  
+>요즘 매일 한문제 이상씩은 풀고 있는데 자꾸 새벽에 풀다 보니 깃허브에 안올리고 자는 날이 많은 것 같다. 낮시간에 풀고 빨리 자는 걸로  
