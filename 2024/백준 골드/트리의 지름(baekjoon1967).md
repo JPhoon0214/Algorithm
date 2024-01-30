@@ -2,57 +2,74 @@
 ====
 
 >### 문제 유형/난이도
->골드3 /DP
+>골드4 / DFS
 <br/>
 
 >### 문제
-> <a href="https://www.acmicpc.net/problem/1062">문제 바로 가기(baekjoon 1062)</a>
+> <a href="https://www.acmicpc.net/problem/1967">문제 바로 가기(baekjoon 1967)</a>
 
 <br/>
 
 >### 코드
-```C++
+```c++
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-int getBestScore(int first, int last, vector<int>& cards, vector<vector<int> >& cache, int currSum) {
-    if(cache[first][last]!=-1) return cache[first][last];
-    if(first==last) return cache[first][last]=cards[first];
+int totalMax=0;
 
-    int firstMoveSum=(currSum-getBestScore(first+1, last, cards, cache, currSum-cards[first]));
-    int lastMoveSum=(currSum-getBestScore(first, last-1, cards, cache, currSum-cards[last]));
+int getSideLen(vector<vector<pair<int, int> > >& connection, int parent) {
+    int currMaxLen=0;
+    int currSecondMaxLen=0;
 
-    return cache[first][last]=max(firstMoveSum, lastMoveSum);
+    for(int i=0; i<connection[parent].size(); i++) {
+        int child=connection[parent][i].first;
+        int weight=connection[parent][i].second;
+        int ret=getSideLen(connection, child)+weight;
+
+        if(currMaxLen<ret) {
+            currSecondMaxLen=currMaxLen;
+            currMaxLen=ret;
+        }
+        else if(currSecondMaxLen<ret) {
+            currSecondMaxLen=ret;
+        }
+    }
+
+    totalMax=max(totalMax, currMaxLen+currSecondMaxLen);
+    return currMaxLen;
 }
 
 int main() {
-    int testCase;
-    cin>>testCase;
+    int n;
+    cin>>n;
 
-    for(; testCase>0; testCase--) {
-        int cardNum;
-        cin>>cardNum;
+    vector<bool> isRoot(n, true);
 
-        int allSum=0;
-
-        vector<int> cards(cardNum);
-        for(int i=0; i<cardNum; i++) {
-            cin>>cards[i];
-            allSum+=cards[i];
-        }
-
-        vector<vector<int> > cache(cardNum, vector<int>(cardNum, -1));
-        cout<<getBestScore(0, cardNum-1, cards, cache, allSum)<<"\n";
+    vector<vector<pair<int, int> > > connection(n, vector<pair<int, int> >());
+    for(int i=0; i<n-1; i++) {
+        int parent, child, weight;
+        cin>>parent>>child>>weight;
+        connection[parent-1].push_back({child-1, weight});
+        isRoot[child-1]=false;
     }
+
+    int root=-1;
+    for(int i=0; i<n; i++) {
+        if(isRoot[i]) {
+            root=i;
+            break;
+        }
+    }
+
+    getSideLen(connection, root);
+    cout<<totalMax;
 }
 ```
 <br/>
 
 >### 회고
->예전에 비슷한 문제를 풀어봤던 것 같은데 그때는 DP 문제가 아니었다.  
->처음 아이디어를 고민하는데는 얼마 안 걸렸는데, 구체적으로 어떻게 동작하는지 설계하는데 오래 걸렸다.  
->부분합을 구해 저장을 할까 생각했었는데, 결과적으로 전체 합을 한번만 구하면 재귀를 통해 자연스럽게 부분합을 구할 수 있어 그럴 필요는 없었다.  
->아마 부분합을 직접 구했어도 솔브는 되지 않았을까.  
->cache[first][last] = first-last 구간의 카드만 남았을 때 낼 수 있는 점수의 최대 값이다.  
+매일 알고리즘을 풀고 있긴 한데 정리는 오랜만에 하는 것 같다.  
+내일 알고리즘 스터디가 있는데, 나에게 할당된 문제는 이 문제다. 평범한 그래프가 아닌 트리 구조이기 때문에 양방향 그래프가 아닌 단반향 그래프로 생각해 부모 노드에서 자식 노드로 탐색을 하도록 강제했다. 물론 이렇게 하려면 가장 윗단의 루트 노트를 찾아야 한다. 또한 이 문제에서는 숫자가 작은 노드가 부모 노드가 아닐 수 있으며 이진 트리가 아닐 수 있다는 점도 생각해야 한다. 예시가 전부 위 상황밖에 없어서 무심결에 놓치기 쉬웠다.  
+모든 부모 노드를 돌면서 그 부모 노드를 루트로 하는 서브 트리에서 만들어 질 수 있는 최대 지름을 구해 전역 변수에 계속 저장했고, 동시에 그래프를 탐색하는 함수는 해당 노드부터 한 방향으로 내려갈 때 얻을 수 있는 최대 길이를 반환하도록 했다. 트리는 자식 노드가 부모 노드를 하나만 가지기 때문에 같은 자식 노드가 두번 방문되는 일은 없고, 그래서 따로 이미 방문한 노드인지 검사하는 코드는 넣지 않았다.  
