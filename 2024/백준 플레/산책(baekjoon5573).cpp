@@ -6,7 +6,7 @@ using namespace std;
 const int dx[2]={0, 1};
 const int dy[2]={1, 0};
 
-vector<vector<int> > cache(1001, vector<int>(1001, -1));
+vector<vector<int> > cache(1001, vector<int>(1001, -1)); 
 int height, width;
 
 int saveCache(vector<vector<int> >& map, int x, int y) {
